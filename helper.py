@@ -1,20 +1,52 @@
 from bs4 import BeautifulSoup
 import requests
 from pprint import pprint
+import re
+import csv
+
+def ltos(s):
+    str1 = " " 
+    return (str1.join(s)) 
 
 def getHTML(link):
     req = requests.get(link)
     html = req.content
     return html
 
+def heading(name):
+    header = ['Title', 'ID', 'IMDB Results', 'THDB Results', 'Cinestaan Results', 'Box Office India Results']
+    with open(name, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
 
-def movieDetail_imdb(id):
+
+def tabulate(name, detail):
+    array = []
+    array.append(detail['title'])
+    array.append(detail['id'])
+    array.append(ltos(detail['imdb']))
+    array.append(ltos(detail['thdb']))
+    array.append(ltos(detail['cinestaan']))
+    array.append(ltos(detail['boi']))
+
+    with open(name, 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(array)
+
+
+
+def movieDetail(id):
+    ret_det = {}
     link = "https://www.imdb.com/title/{}".format(id)
     html = getHTML(link)
     soup = BeautifulSoup(html, "html.parser")
     
-
-
+    title = soup.find("div", {"class": "title_wrapper"})
+    title = title.find("h1").text
+    
+    ret_det["id"] = id
+    title = re.sub("[\(\[].*?[\)\]]", "", title).strip()
+    ret_det["title"] = title
     details = soup.find("div", {"id": "titleDetails"})
     details_str = str(details).split("<hr/>")
     box_office = ""
@@ -23,8 +55,105 @@ def movieDetail_imdb(id):
             box_office = det_str
     box_office = BeautifulSoup(box_office, "html.parser")
     box_office_details = box_office.findAll("div", {"class":"txt-block"})
-    for box_office_detail in box_office_details:
-        print(box_office_detail.text.strip().replace("\n",""))
-    # print(box_office.text.strip())
+    
+    imdb_dets = []
 
-# movieDetail_imdb("tt6751668")
+    for box_office_detail in box_office_details:
+        imdb_dets.append(box_office_detail.text.strip().replace("\n",""))
+    ret_det["imdb"] = imdb_dets
+
+
+    thdb_dets = []
+    try:
+        thdb_dets = tmdb(title)
+    except:
+        pass
+    ret_det["thdb"] = thdb_dets
+
+    cine_dets = []
+    try:
+        cine_dets = cinestaan(title)
+    except:
+        pass
+    ret_det["cinestaan"] = cine_dets
+
+    boi_dets = []
+    try:
+        boi_dets = boi(title)
+    except:
+        pass
+    ret_det["boi"] = boi_dets
+
+    return ret_det
+    
+def boi(movie_name):
+    boi_dets = []
+    link = "https://boxofficeindia.com/search.php?txtSearchStr={}&search_type=movies&x=15&y=15".format(movie_name)
+    html = getHTML(link)
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    res = soup.find("tr", {"class": "boi-search-rows"})
+    res = res.find("a")["href"]
+    res = "https://boxofficeindia.com/" + res
+
+    html = getHTML(res)
+    soup = BeautifulSoup(html, "html.parser")
+    soup = soup.findAll("div",{"class":"movieboxssec"})
+    soup = soup[3]
+    movie_information_table = soup.find("table",{"class":"mviedtailstbe"})
+    movie_informations = movie_information_table.findAll("tr")
+    for movie_information in movie_informations:
+        boi_dets.append(movie_information.text.strip().replace("\n",""))
+    return(boi_dets)
+    # print(res)
+
+def tmdb(movie_name):
+    thdb_dets = []
+    api_key = "d3223a6ef267738935b5db9dec91a1b5"
+
+    search_data = requests.get("https://api.themoviedb.org/3/search/movie?api_key={}&query={}".format(api_key, movie_name.replace(" ","+"))).json()
+    movie_id = search_data["results"][0]["id"]
+    movie_details = requests.get("https://api.themoviedb.org/3/movie/{}?api_key={}".format(movie_id, api_key)).json()
+    budget = movie_details["budget"]
+    revenue = movie_details["revenue"]
+    budget = "Budget: "+str(budget)
+    revenue = "Revenue: "+str(revenue)
+    thdb_dets.append(budget)
+    thdb_dets.append(revenue)
+    return thdb_dets
+
+def cinestaan(movie_name):
+    cine_dets = []
+    movie_name = movie_name.replace(" ","+")
+    link = "https://www.cinestaan.com/movies/{}/1/20".format(movie_name)
+    html = getHTML(link)
+
+    soup = BeautifulSoup(html, "html.parser")
+    movies_section = soup.find("section",{"id": "results"})
+    movie_link = movies_section.find("a")['href']
+    
+    html = getHTML(movie_link)
+    soup = BeautifulSoup(html, "html.parser")
+
+    movie_information = soup.find('section', {'id': 'db__movie__explore'})
+    dts = movie_information.findAll('dt')
+    dds = movie_information.findAll('dd')
+    
+    for index, dt in enumerate(dts):
+        if dt.text == 'Budget':
+            cine_dets.append("Budget: "+dds[index].text)
+        if dt.text =='Revenue':
+            cine_dets.append("Revenue: "+dds[index].text)
+    return (cine_dets)
+
+def driver():
+    with open('input.txt', 'r') as f:
+        movies = f.readlines()
+    details_array =[]
+    for movie in movies:
+        movie = movie.strip()
+        detail = movieDetail(movie)
+        pprint(detail)
+        tabulate("results.csv", detail)
+        details_array.append(detail)

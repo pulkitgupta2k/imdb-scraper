@@ -1,5 +1,5 @@
 from helper import *
 
-movie = input("enter the id of the movie: ")
-
-movieDetail_imdb(movie)
+if __name__ == "__main__":
+    heading("results.csv") #uncomment if you want to delete previous data.
+    driver()
