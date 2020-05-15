@@ -14,7 +14,7 @@ def getHTML(link):
     return html
 
 def heading(name):
-    header = ['Title', 'ID', 'IMDB Budget', 'IMDB Revenue', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)']
+    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)']
     with open(name, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
@@ -26,6 +26,8 @@ def tabulate(name, detail):
     array.append(detail['id'])
     array.append(detail['imdb'][0])
     array.append(detail['imdb'][1])
+    array.append(detail['imdb'][2])
+    array.append(detail['imdb'][3])
     array.append(detail['thdb'][0])
     array.append(detail['thdb'][1])
     array.append(detail['cinestaan'][0])
@@ -60,15 +62,21 @@ def movieDetail(id):
     box_office = BeautifulSoup(box_office, "html.parser")
     box_office_details = box_office.findAll("div", {"class":"txt-block"})
     
-    imdb_dets = ['','']
+    imdb_dets = ['','','', '']
 
     for box_office_detail in box_office_details:
         if box_office_detail.find('h4').text == 'Budget:':
             budget = box_office_detail.text.strip().replace("\n","").replace("Budget:","").split()[0]
             imdb_dets[0] = budget
+        elif box_office_detail.find('h4').text == 'Opening Weekend USA:':
+            revenue = box_office_detail.text.strip().replace("\n","").replace("Opening Weekend USA:","").strip()
+            imdb_dets[1] = budget
+        elif box_office_detail.find('h4').text == 'Gross USA:':
+            revenue = box_office_detail.text.strip().replace("\n","").replace("Gross USA:","").strip()
+            imdb_dets[2] = budget
         elif box_office_detail.find('h4').text == 'Cumulative Worldwide Gross:':
-            revenue = box_office_detail.text.strip().replace("\n","").replace("Cumulative Worldwide Gross:","").strip()
-            imdb_dets[1] = revenue
+            revenue = box_office_detail.text.strip().replace("\n","").replace("Cumulative Worldwide Gross:","").strip()    
+            imdb_dets[3] = revenue
 
     ret_det["imdb"] = imdb_dets
 
