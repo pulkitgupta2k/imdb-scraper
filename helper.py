@@ -14,7 +14,7 @@ def getHTML(link):
     return html
 
 def heading(name):
-    header = ['Title', 'ID', 'IMDB Results', 'THDB Results', 'Cinestaan Results', 'Box Office India Results']
+    header = ['Title', 'ID', 'IMDB Budget', 'IMDB Revenue', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)']
     with open(name, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
@@ -24,10 +24,14 @@ def tabulate(name, detail):
     array = []
     array.append(detail['title'])
     array.append(detail['id'])
-    array.append(ltos(detail['imdb']))
-    array.append(ltos(detail['thdb']))
-    array.append(ltos(detail['cinestaan']))
-    array.append(ltos(detail['boi']))
+    array.append(detail['imdb'][0])
+    array.append(detail['imdb'][1])
+    array.append(detail['thdb'][0])
+    array.append(detail['thdb'][1])
+    array.append(detail['cinestaan'][0])
+    array.append(detail['cinestaan'][1])
+    array.append(detail['boi'][0])
+    array.append(detail['boi'][1])
 
     with open(name, 'a', newline='') as f:
         writer = csv.writer(f)
@@ -56,10 +60,16 @@ def movieDetail(id):
     box_office = BeautifulSoup(box_office, "html.parser")
     box_office_details = box_office.findAll("div", {"class":"txt-block"})
     
-    imdb_dets = []
+    imdb_dets = ['','']
 
     for box_office_detail in box_office_details:
-        imdb_dets.append(box_office_detail.text.strip().replace("\n",""))
+        if box_office_detail.find('h4').text == 'Budget:':
+            budget = box_office_detail.text.strip().replace("\n","").replace("Budget:","").split()[0]
+            imdb_dets[0] = budget
+        elif box_office_detail.find('h4').text == 'Cumulative Worldwide Gross:':
+            revenue = box_office_detail.text.strip().replace("\n","").replace("Cumulative Worldwide Gross:","").strip()
+            imdb_dets[1] = revenue
+
     ret_det["imdb"] = imdb_dets
 
 
@@ -67,6 +77,8 @@ def movieDetail(id):
     try:
         thdb_dets = tmdb(title)
     except:
+        thdb_dets.append('')
+        thdb_dets.append('')
         pass
     ret_det["thdb"] = thdb_dets
 
@@ -74,6 +86,8 @@ def movieDetail(id):
     try:
         cine_dets = cinestaan(title)
     except:
+        cine_dets.append('')
+        cine_dets.append('')
         pass
     ret_det["cinestaan"] = cine_dets
 
@@ -81,13 +95,15 @@ def movieDetail(id):
     try:
         boi_dets = boi(title)
     except:
+        boi_dets.append('')
+        boi_dets.append('')
         pass
     ret_det["boi"] = boi_dets
 
     return ret_det
     
 def boi(movie_name):
-    boi_dets = []
+    boi_dets = [' ', ' ']
     link = "https://boxofficeindia.com/search.php?txtSearchStr={}&search_type=movies&x=15&y=15".format(movie_name)
     html = getHTML(link)
 
@@ -104,12 +120,18 @@ def boi(movie_name):
     movie_information_table = soup.find("table",{"class":"mviedtailstbe"})
     movie_informations = movie_information_table.findAll("tr")
     for movie_information in movie_informations:
-        boi_dets.append(movie_information.text.strip().replace("\n",""))
+        information = movie_information.text.strip().replace("\n","").replace("\xa0","")
+        if 'Budget' in information:
+            boi_dets[0] = information.replace("Budget:","")
+        elif 'Worldwide Gross' in information:
+            boi_dets[1] = information.replace("Worldwide Gross:", "")
+            break
+
     return(boi_dets)
     # print(res)
 
 def tmdb(movie_name):
-    thdb_dets = []
+    thdb_dets = ['', '']
     api_key = "d3223a6ef267738935b5db9dec91a1b5"
 
     search_data = requests.get("https://api.themoviedb.org/3/search/movie?api_key={}&query={}".format(api_key, movie_name.replace(" ","+"))).json()
@@ -117,14 +139,12 @@ def tmdb(movie_name):
     movie_details = requests.get("https://api.themoviedb.org/3/movie/{}?api_key={}".format(movie_id, api_key)).json()
     budget = movie_details["budget"]
     revenue = movie_details["revenue"]
-    budget = "Budget: "+str(budget)
-    revenue = "Revenue: "+str(revenue)
-    thdb_dets.append(budget)
-    thdb_dets.append(revenue)
+    thdb_dets[0] = budget
+    thdb_dets[1] = revenue
     return thdb_dets
 
 def cinestaan(movie_name):
-    cine_dets = []
+    cine_dets = ['', '']
     movie_name = movie_name.replace(" ","+")
     link = "https://www.cinestaan.com/movies/{}/1/20".format(movie_name)
     html = getHTML(link)
@@ -142,9 +162,9 @@ def cinestaan(movie_name):
     
     for index, dt in enumerate(dts):
         if dt.text == 'Budget':
-            cine_dets.append("Budget: "+dds[index].text)
+            cine_dets[0] = dds[index].text.replace("INR ","")
         if dt.text =='Revenue':
-            cine_dets.append("Revenue: "+dds[index].text)
+            cine_dets[1] = dds[index].text.replace("INR ","")
     return (cine_dets)
 
 def driver():
