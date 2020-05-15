@@ -162,9 +162,9 @@ def cinestaan(movie_name):
     
     for index, dt in enumerate(dts):
         if dt.text == 'Budget':
-            cine_dets[0] = dds[index].text.replace("INR ","")
+            cine_dets[0] = dds[index].text.replace("INR ","").replace("(est.)", "").strip()
         if dt.text =='Revenue':
-            cine_dets[1] = dds[index].text.replace("INR ","")
+            cine_dets[1] = dds[index].text.replace("INR ","").replace("(est.)", "").strip()
     return (cine_dets)
 
 def driver():
