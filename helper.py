@@ -36,8 +36,13 @@ def tabulate(name, detail):
     array.append(detail['boi'][1])
 
     with open(name, 'a', encoding='UTF-8', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(array)
+        try:
+            writer = csv.writer(f)
+            writer.writerow(array)
+        except:
+            array[0] = 'Illegal character in title'
+            writer = csv.writer(f)
+            writer.writerow(array)
 
 
 
