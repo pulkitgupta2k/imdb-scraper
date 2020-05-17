@@ -35,7 +35,7 @@ def tabulate(name, detail):
     array.append(detail['boi'][0])
     array.append(detail['boi'][1])
 
-    with open(name, 'a', newline='') as f:
+    with open(name, 'a', encoding='UTF-8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(array)
 
