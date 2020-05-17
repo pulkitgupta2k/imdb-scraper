@@ -14,7 +14,7 @@ def getHTML(link):
     return html
 
 def heading(name):
-    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)']
+    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)', 'The Numbers Domestic Gross', 'The Numbers Worldwide Gross']
     with open(name, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
@@ -34,6 +34,8 @@ def tabulate(name, detail):
     array.append(detail['cinestaan'][1])
     array.append(detail['boi'][0])
     array.append(detail['boi'][1])
+    array.append(detail['number'][0])
+    array.append(detail['number'][1])
 
     with open(name, 'a', encoding='UTF-8', newline='') as f:
         try:
@@ -125,6 +127,14 @@ def movieDetail(id):
         pass
     ret_det["boi"] = boi_dets
 
+    number_dets = []
+    try:
+        number_dets = numbers(title)
+    except:
+        number_dets.append('')
+        number_dets.append('')
+        pass
+    ret_det["number"] = number_dets
     return ret_det
     
 def boi(movie_name):
@@ -191,6 +201,25 @@ def cinestaan(movie_name):
         if dt.text =='Revenue':
             cine_dets[1] = dds[index].text.replace("INR ","").replace("(est.)", "").strip()
     return (cine_dets)
+
+def numbers(movie_name):
+    numbers_dets = ['', '']
+    movie_name = movie_name.replace(" ","+")
+    link = "https://www.the-numbers.com/custom-search?searchterm={}&searchtype=simple".format(movie_name)
+    html = getHTML(link)
+    
+    soup = BeautifulSoup(html, "html.parser")
+    try:
+        chart = soup.findAll("div", {"id": "page_filling_chart"})[1]
+        table = chart.find("table")
+        row = table.findAll("td", {"class": "data"})
+        numbers_dets[0] = row[1].text
+        numbers_dets[1] = row[2].text
+    except:
+        return numbers_dets
+    return numbers_dets
+
+    #     print(detail.text)
 
 def driver():
     with open('input.txt', 'r') as f:
