@@ -66,17 +66,29 @@ def movieDetail(id):
 
     for box_office_detail in box_office_details:
         if box_office_detail.find('h4').text == 'Budget:':
-            budget = box_office_detail.text.strip().replace("\n","").replace("Budget:","").split()[0]
-            imdb_dets[0] = budget
+            try:
+                budget = box_office_detail.text.strip().replace("\n","").replace("Budget:","").split()[0]
+                imdb_dets[0] = budget
+            except:
+                continue
         elif box_office_detail.find('h4').text == 'Opening Weekend USA:':
-            revenue = box_office_detail.text.strip().replace("\n","").replace("Opening Weekend USA:","").strip()
-            imdb_dets[1] = budget
+            try:
+                revenue = box_office_detail.text.strip().replace("\n","").replace("Opening Weekend USA:","").strip()
+                imdb_dets[1] = budget
+            except:
+                continue
         elif box_office_detail.find('h4').text == 'Gross USA:':
-            revenue = box_office_detail.text.strip().replace("\n","").replace("Gross USA:","").strip()
-            imdb_dets[2] = budget
+            try:
+                revenue = box_office_detail.text.strip().replace("\n","").replace("Gross USA:","").strip()
+                imdb_dets[2] = budget
+            except:
+                continue
         elif box_office_detail.find('h4').text == 'Cumulative Worldwide Gross:':
-            revenue = box_office_detail.text.strip().replace("\n","").replace("Cumulative Worldwide Gross:","").strip()    
-            imdb_dets[3] = revenue
+            try:
+                revenue = box_office_detail.text.strip().replace("\n","").replace("Cumulative Worldwide Gross:","").strip()    
+                imdb_dets[3] = revenue
+            except:
+                continue
 
     ret_det["imdb"] = imdb_dets
 
