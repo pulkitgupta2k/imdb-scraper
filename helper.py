@@ -14,7 +14,7 @@ def getHTML(link):
     return html
 
 def heading(name):
-    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)', 'The Numbers Domestic Gross', 'The Numbers Worldwide Gross']
+    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'Cast 1' , 'Cast 2', 'Cast 3', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)', 'The Numbers Domestic Gross', 'The Numbers Worldwide Gross']
     with open(name, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
@@ -28,6 +28,9 @@ def tabulate(name, detail):
     array.append(detail['imdb'][1])
     array.append(detail['imdb'][2])
     array.append(detail['imdb'][3])
+    array.append(detail['imdb'][4])
+    array.append(detail['imdb'][5])
+    array.append(detail['imdb'][6])
     array.append(detail['thdb'][0])
     array.append(detail['thdb'][1])
     array.append(detail['cinestaan'][0])
@@ -69,7 +72,25 @@ def movieDetail(id):
     box_office = BeautifulSoup(box_office, "html.parser")
     box_office_details = box_office.findAll("div", {"class":"txt-block"})
     
-    imdb_dets = ['','','', '']
+    cast_det = soup.find("div", {"id": "titleCast"})
+    casts = cast_det.findAll("tr")
+    
+    cast1 = ""
+    cast2 = ""
+    cast3 = ""
+
+    try:
+        cast1 = casts[1].text.split("...")[0].strip()
+        cast2 = casts[2].text.split("...")[0].strip()
+        cast3 = casts[3].text.split("...")[0].strip()
+    except:
+        pass
+
+    imdb_dets = ['','','','','','', '']
+
+    imdb_dets[4] = cast1
+    imdb_dets[5] = cast2
+    imdb_dets[6] = cast3
 
     for box_office_detail in box_office_details:
         if box_office_detail.find('h4').text == 'Budget:':
