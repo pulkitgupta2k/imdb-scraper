@@ -72,14 +72,14 @@ def movieDetail(id):
     box_office = BeautifulSoup(box_office, "html.parser")
     box_office_details = box_office.findAll("div", {"class":"txt-block"})
     
-    cast_det = soup.find("div", {"id": "titleCast"})
-    casts = cast_det.findAll("tr")
     
     cast1 = ""
     cast2 = ""
     cast3 = ""
 
     try:
+        cast_det = soup.find("div", {"id": "titleCast"})
+        casts = cast_det.findAll("tr")
         cast1 = casts[1].text.split("...")[0].strip()
         cast2 = casts[2].text.split("...")[0].strip()
         cast3 = casts[3].text.split("...")[0].strip()
