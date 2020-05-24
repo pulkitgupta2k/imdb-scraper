@@ -139,6 +139,15 @@ def movieDetail(id):
         thdb_dets.append('')
         thdb_dets.append('')
         pass
+    try:
+        if thdb_dets[0] == 0:
+            thdb_dets[0] = ""
+
+        if thdb_dets[1] == 0:
+            thdb_dets[1] = ""
+    except:
+        pass
+    
     ret_det["thdb"] = thdb_dets
 
     cine_dets = []
@@ -160,12 +169,22 @@ def movieDetail(id):
     ret_det["boi"] = boi_dets
 
     number_dets = []
+
     try:
         number_dets = numbers(title)
     except:
         number_dets.append('')
         number_dets.append('')
         pass
+
+    try:
+        if number_dets[0] == '0':
+            number_dets[0] = ""
+        if number_dets[1] == '0':
+            number_dets[1] = ""
+    except:
+        pass
+
     ret_det["number"] = number_dets
     return ret_det
     
@@ -238,6 +257,7 @@ def numbers(movie_name):
     numbers_dets = ['', '']
     movie_name = movie_name.replace(" ","+")
     link = "https://www.the-numbers.com/custom-search?searchterm={}&searchtype=simple".format(movie_name)
+    # print(link)
     html = getHTML(link)
     
     soup = BeautifulSoup(html, "html.parser")
