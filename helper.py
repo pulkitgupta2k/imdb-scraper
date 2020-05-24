@@ -14,7 +14,7 @@ def getHTML(link):
     return html
 
 def heading(name):
-    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'Cast 1' , 'Cast 2', 'Cast 3', 'Company Credits',  'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)', 'The Numbers Domestic Gross', 'The Numbers Worldwide Gross']
+    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'Cast 1' , 'Cast 2', 'Cast 3', 'Company Credits',  'TMDB Budget ($)', 'TMDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)', 'The Numbers Domestic Gross', 'The Numbers Worldwide Gross']
     with open(name, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
