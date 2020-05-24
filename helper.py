@@ -14,7 +14,7 @@ def getHTML(link):
     return html
 
 def heading(name):
-    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'Cast 1' , 'Cast 2', 'Cast 3', 'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)', 'The Numbers Domestic Gross', 'The Numbers Worldwide Gross']
+    header = ['Title', 'ID', 'IMDB Budget', 'Cumulative Worldwide Gross', 'Opening Weekend USA', 'Gross USA', 'Cast 1' , 'Cast 2', 'Cast 3', 'Company Credits',  'THDB Budget ($)', 'THDB Revenue ($)', 'Cinestaan Budget (INR)', 'Cinestaan Revenue (INR)', 'Box Office India Budget (INR)', 'Box Office India Revenue (INR)', 'The Numbers Domestic Gross', 'The Numbers Worldwide Gross']
     with open(name, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
@@ -31,6 +31,7 @@ def tabulate(name, detail):
     array.append(detail['imdb'][4])
     array.append(detail['imdb'][5])
     array.append(detail['imdb'][6])
+    array.append(detail['imdb'][7])
     array.append(detail['thdb'][0])
     array.append(detail['thdb'][1])
     array.append(detail['cinestaan'][0])
@@ -86,11 +87,21 @@ def movieDetail(id):
     except:
         pass
 
-    imdb_dets = ['','','','','','', '']
+    imdb_dets = ['','','','','','', '', '']
 
     imdb_dets[4] = cast1
     imdb_dets[5] = cast2
     imdb_dets[6] = cast3
+
+    try:
+        link = link + "/companycredits"
+        html = getHTML(link)
+        soup = BeautifulSoup(html, "html.parser")
+        production = soup.find('div', {'id': 'company_credits_content'})
+        company = production.find('ul').text.strip()
+        imdb_dets[7] = company
+    except:
+        pass
 
     for box_office_detail in box_office_details:
         if box_office_detail.find('h4').text == 'Budget:':
